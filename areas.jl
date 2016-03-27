@@ -39,11 +39,25 @@ function asym_circle(x0, y0, ang, R1, R2, a)
     return xyt
 end
 
-function pointy_circle(x0, y0, ang, R1)
-    xyt = zeros(length(xgrid), length(ygrid))
-    xyt += circle(x0, y0, R1)
 
-end 
+function spiral(x0, y0, ang, R, b)
+    xyt = zeros(length(xgrid), length(ygrid))
+
+    for j = 1:length(ygrid)
+        y = ygrid[j]
+        if (y-y0)^2 < (R + (2pi*b))^2
+            for i = 1:length(xgrid)
+                x = xgrid[i]
+                xyang = atan2(y-y0,x-x0)
+                if (x-x0)^2 + (y-y0)^2 < (R + b*mod2pi(ang+xyang))^2
+                    xyt[j,i] += 1
+                end
+            end
+        end
+    end
+
+    return xyt
+end
 
 dxdy = (xgrid[2]-xgrid[1])*(ygrid[2]-ygrid[1])
 function compute_area(xy) 
@@ -63,20 +77,22 @@ end
 #mshape(x,y,ang) = annulus(x, y, 1.0, 0.4) #second moving annulus
 
 #asymmetric circles
-xyt = asym_circle(0.0, 0.0, 0.0, 1.0, 0.4, 0.24)
-mshape(x,y,ang) = asym_circle(x, y, ang, 1.0, 0.4, 0.24)
+#xyt = asym_circle(0.0, 0.0, 0.0, 1.0, 0.4, 0.24)
+#mshape(x,y,ang) = asym_circle(x, y, ang, 1.0, 0.4, 0.24)
 
+xyt = spiral(0.0, 0.0, 0.0, 1.0, 0.1)
+mshape(x,y,ang) = spiral(x,y,ang, 1.0, 0.1)
 
 #initial location for second obj
-#xx = 1.9
-#yy = 0.0
-#chi = pi/2
+xx = 1.9
+yy = 0.0
+chi = pi/2
 
 xx = 0.0
 yy = 0.0
-chi = -pi/4
+chi = pi/2
+
 drs = 0.1
-#dangs = 0.1
 
 mdarea = 0.0 #current biggest area
 Nsteps = 50
@@ -120,8 +136,8 @@ for k = 1:Nsteps
     #search best angle
     make_rot = false
     dchi = 0.0
-    dchi_lim = 0.5 #max rotation that the system makes
-    dchis = dchi_lim/1000.0 #max rotation step that the system can make
+    dchi_lim = 0.1 #max rotation that the system makes
+    dchis = dchi_lim/10 #max rotation step that the system can make
    
     #rotate to left 
     xy = xyt
